@@ -1,11 +1,14 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt';
-import { hashPassword, comparePasswords, generateToken } from './utils/auth';
+import { Env } from './types/env';
+import { auth } from './middleware/auth';
 import { adminAuth } from './middleware/adminAuth';
+import products from './routes/products';
 import paymentCallbacks from './routes/paymentCallbacks';
+import paymentStats from './services/paymentStats';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
 // 启用CORS
 app.use('/*', cors());
@@ -2077,5 +2080,11 @@ app.post('/api/performance/batch', async (c) => {
 
 // 支付回调路由
 app.route('/api/callbacks', paymentCallbacks);
+
+// 支付统计路由
+app.route('/api/payments', paymentStats);
+
+// 商品管理路由
+app.route('/api/products', products);
 
 export default app; 
