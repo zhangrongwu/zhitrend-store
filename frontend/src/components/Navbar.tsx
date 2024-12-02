@@ -69,13 +69,18 @@ export default function Navbar() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 justify-between">
               <div className="flex">
-                <Link to="/" className="flex flex-shrink-0 items-center">
+                <a 
+                  href="https://zhitrend.us.kg" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex flex-shrink-0 items-center"
+                >
                   <img
                     className="h-8 w-auto"
-                    src="/logo.svg"
-                    alt="Your Company"
+                    src="/images/logo.svg"
+                    alt="智潮磅礴科技"
                   />
-                </Link>
+                </a>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                   <Link
                     to="/"

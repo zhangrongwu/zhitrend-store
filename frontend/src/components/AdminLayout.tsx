@@ -34,8 +34,8 @@ export default function AdminLayout() {
               <div className="flex flex-shrink-0 items-center px-4">
                 <img
                   className="h-8 w-auto"
-                  src="/logo-white.svg"
-                  alt="Your Company"
+                  src="/images/logo-white.svg"
+                  alt="智潮磅礴科技"
                 />
               </div>
               <nav className="mt-5 flex-1 space-y-1 px-2">

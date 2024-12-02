@@ -150,13 +150,13 @@ export default function RatingList({ productId }: RatingListProps) {
               <div className="mt-2 flex justify-end space-x-2">
                 <button
                   onClick={() => setReplyingTo(null)}
-                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+                  className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
                 >
                   取消
                 </button>
                 <button
                   onClick={() => handleReply(rating.id)}
-                  className="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                  className="px-3 py-1 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-700"
                 >
                   回复
                 </button>
