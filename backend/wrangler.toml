@@ -1,12 +1,15 @@
 name = "backend"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2023-01-01"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "my_store"
-database_id = "xxxx"
+database_name = "shop"
+database_id = "your-database-id"
 
 [[r2_buckets]]
 binding = "R2"
-bucket_name = "my-store-bucket" 
+bucket_name = "shop-uploads"
+
+[vars]
+JWT_SECRET = "your-jwt-secret" 

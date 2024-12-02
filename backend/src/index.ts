@@ -1923,4 +1923,124 @@ app.post('/api/automation/execute', async (c) => {
   }
 });
 
+// 商品分析API
+app.get('/api/admin/analytics/products', adminAuth, async (c) => {
+  const { DB } = c.env;
+  
+  try {
+    // 商品统计
+    const productStats = await DB.prepare(`
+      WITH product_metrics AS (
+        SELECT 
+          p.id,
+          p.name,
+          COUNT(DISTINCT CASE WHEN ub.action_type = 'view' THEN ub.id END) as views,
+          COUNT(DISTINCT CASE WHEN ub.action_type = 'cart' THEN ub.id END) as cart_adds,
+          COUNT(DISTINCT CASE WHEN ub.action_type = 'purchase' THEN ub.id END) as purchases,
+          SUM(CASE WHEN ub.action_type = 'purchase' THEN oi.price * oi.quantity ELSE 0 END) as revenue
+        FROM products p
+        LEFT JOIN user_behaviors ub ON p.id = ub.product_id
+        LEFT JOIN order_items oi ON p.id = oi.product_id
+        GROUP BY p.id
+      )
+      SELECT 
+        id,
+        name,
+        views,
+        cart_adds as cartAdds,
+        purchases as sales,
+        revenue,
+        CASE 
+          WHEN views > 0 THEN CAST(purchases AS FLOAT) / views 
+          ELSE 0 
+        END as conversion_rate
+      FROM product_metrics
+      ORDER BY revenue DESC
+    `).all();
+
+    // 分类表现
+    const categoryPerformance = await DB.prepare(`
+      SELECT 
+        c.name as category,
+        COUNT(DISTINCT p.id) as products,
+        COUNT(DISTINCT oi.id) as sales,
+        SUM(oi.price * oi.quantity) as revenue
+      FROM categories c
+      LEFT JOIN products p ON c.id = p.category_id
+      LEFT JOIN order_items oi ON p.id = oi.product_id
+      GROUP BY c.id
+      ORDER BY revenue DESC
+    `).all();
+
+    // 价格区间分析
+    const priceRangeAnalysis = await DB.prepare(`
+      WITH ranges AS (
+        SELECT 
+          CASE 
+            WHEN price <= 100 THEN '¥0-100'
+            WHEN price <= 500 THEN '¥101-500'
+            ELSE '¥500以上'
+          END as range,
+          id
+        FROM products
+      )
+      SELECT 
+        r.range,
+        COUNT(DISTINCT p.id) as products,
+        COUNT(DISTINCT oi.id) as sales,
+        SUM(oi.price * oi.quantity) as revenue
+      FROM ranges r
+      JOIN products p ON r.id = p.id
+      LEFT JOIN order_items oi ON p.id = oi.product_id
+      GROUP BY r.range
+      ORDER BY MIN(p.price)
+    `).all();
+
+    // 浏览转化分析
+    const viewToCartRate = await DB.prepare(`
+      WITH product_views AS (
+        SELECT 
+          product_id,
+          COUNT(*) as view_count
+        FROM user_behaviors
+        WHERE action_type = 'view'
+        GROUP BY product_id
+      ),
+      product_carts AS (
+        SELECT 
+          product_id,
+          COUNT(*) as cart_count
+        FROM user_behaviors
+        WHERE action_type = 'cart'
+        GROUP BY product_id
+      )
+      SELECT 
+        p.id as product_id,
+        p.name,
+        COALESCE(pv.view_count, 0) as views,
+        COALESCE(pc.cart_count, 0) as cart_adds,
+        CASE 
+          WHEN pv.view_count > 0 
+          THEN CAST(pc.cart_count AS FLOAT) / pv.view_count 
+          ELSE 0 
+        END as rate
+      FROM products p
+      LEFT JOIN product_views pv ON p.id = pv.product_id
+      LEFT JOIN product_carts pc ON p.id = pc.product_id
+      WHERE pv.view_count > 0
+      ORDER BY rate DESC
+      LIMIT 10
+    `).all();
+
+    return c.json({
+      productStats: productStats.results,
+      categoryPerformance: categoryPerformance.results,
+      priceRangeAnalysis: priceRangeAnalysis.results,
+      viewToCartRate: viewToCartRate.results,
+    });
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch product analytics' }, 500);
+  }
+});
+
 export default app; 

@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 execute shop --file=./schema.sql"
+  }
+} 

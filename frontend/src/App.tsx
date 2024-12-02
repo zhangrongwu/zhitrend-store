@@ -20,6 +20,7 @@ import InventoryManagement from './pages/Admin/InventoryManagement';
 import UserAnalytics from './pages/Admin/UserAnalytics';
 import Reports from './pages/Admin/Reports';
 import MarketingManagement from './pages/Admin/MarketingManagement';
+import ProductAnalytics from './pages/Admin/ProductAnalytics';
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MarketingManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/product-analytics" 
+                element={
+                  <ProtectedRoute>
+                    <ProductAnalytics />
                   </ProtectedRoute>
                 } 
               />
