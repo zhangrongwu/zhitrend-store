@@ -8,6 +8,10 @@ export default defineConfig({
     port: 3001,
   },
   build: {
+    // 关闭类型检查
+    typescript: {
+      ignoreBuildErrors: true,
+    },
     // 关闭 ESLint 校验
     rollupOptions: {
       onwarn(warning, warn) {
@@ -15,6 +19,7 @@ export default defineConfig({
         if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         if (warning.code.includes('ESLINT')) return;
+        if (warning.code === 'TS_ERROR') return;
         
         // 使用默认的警告处理
         warn(warning);

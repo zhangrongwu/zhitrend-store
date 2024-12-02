@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { verify } from '../utils/auth';
+import { verifyToken } from '../utils/auth';
 import { Env } from '../types/env';
 
 export async function auth() {
@@ -11,8 +11,8 @@ export async function auth() {
 
     const token = authHeader.split(' ')[1];
     try {
-      const payload = await verify(token, c.env.JWT_SECRET);
-      c.set('jwtPayload', payload);
+      const payload = await verifyToken(token, c.env.JWT_SECRET);
+      c.set('user', payload);
       await next();
     } catch (error) {
       return c.json({ error: 'Invalid token' }, 401);

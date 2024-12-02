@@ -1,19 +1,22 @@
-import { sign, verify as jwtVerify } from 'hono/jwt';
+import { sign, verify } from 'hono/jwt';
 import { hash, compare } from 'bcryptjs';
-import { JWTPayload } from '../types/user';
 
+// 密码加密
 export async function hashPassword(password: string): Promise<string> {
   return hash(password, 10);
 }
 
-export async function comparePasswords(password: string, hash: string): Promise<boolean> {
-  return compare(password, hash);
+// 密码验证
+export async function comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
+  return compare(password, hashedPassword);
 }
 
-export async function generateToken(payload: JWTPayload, secret: string): Promise<string> {
+// 生成JWT token
+export async function generateToken(payload: any, secret: string): Promise<string> {
   return sign(payload, secret);
 }
 
-export async function verify(token: string, secret: string): Promise<JWTPayload> {
-  return jwtVerify(token, secret);
+// 验证JWT token
+export async function verifyToken(token: string, secret: string): Promise<any> {
+  return verify(token, secret);
 } 

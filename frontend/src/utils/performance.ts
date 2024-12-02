@@ -1,18 +1,18 @@
-export function lazyLoad<T>(importFn: () => Promise<T>) {
+import React from 'react';
+
+export function lazyLoad<T extends { default: React.ComponentType<any> }>(importFn: () => Promise<T>) {
   return React.lazy(() => {
-    return new Promise((resolve) => {
-      // 添加一个最小延迟以避免闪烁
-      const start = performance.now();
-      importFn().then((result) => {
-        const end = performance.now();
-        const timeElapsed = end - start;
-        const minimumDelay = 100;
-        if (timeElapsed < minimumDelay) {
+    const minimumDelay = 300;
+    const startTime = Date.now();
+
+    return importFn().then(result => {
+      const timeElapsed = Date.now() - startTime;
+      if (timeElapsed < minimumDelay) {
+        return new Promise(resolve => {
           setTimeout(() => resolve(result), minimumDelay - timeElapsed);
-        } else {
-          resolve(result);
-        }
-      });
+        });
+      }
+      return result;
     });
   });
 }
@@ -61,4 +61,36 @@ export const preloadImages = async (urls: string[]) => {
   } catch (error) {
     console.error('Failed to preload images:', error);
   }
-}; 
+};
+
+export function measurePerformance(name: string) {
+  const start = performance.now();
+  return {
+    end: () => {
+      const duration = performance.now() - start;
+      console.log(`${name} took ${duration}ms`);
+      return duration;
+    }
+  };
+}
+
+export function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+export function prefetch(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = url;
+    link.onload = () => resolve();
+    link.onerror = () => reject(new Error(`Failed to prefetch: ${url}`));
+    document.head.appendChild(link);
+  });
+} 

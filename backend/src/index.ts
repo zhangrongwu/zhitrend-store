@@ -14,9 +14,9 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('/*', cors());
 
 // JWT中间件
-const auth = jwt({
-  secret: 'your-secret-key',
-});
+app.use('/api/*', jwt({
+  secret: c => c.env.JWT_SECRET
+}));
 
 // 用户认证API
 app.post('/api/auth/register', async (c) => {

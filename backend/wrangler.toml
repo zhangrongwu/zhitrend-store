@@ -13,7 +13,7 @@ binding = "R2"
 bucket_name = "shop-uploads"
 
 [vars]
-JWT_SECRET = "your-jwt-secret"
+JWT_SECRET = "your-secret-key-here"
 
 [build]
 command = "npm run build" 
