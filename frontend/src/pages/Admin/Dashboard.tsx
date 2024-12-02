@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ChartBarIcon, UserGroupIcon, ShoppingCartIcon, CurrencyYenIcon } from '@heroicons/react/24/outline';
+import ExportData from '../../components/ExportData';
 
 interface Stats {
   totalUsers: number;
@@ -37,7 +38,26 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h2 className="text-2xl font-bold mb-6">仪表板</h2>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-bold">仪表板</h2>
+        <div className="space-x-4">
+          <ExportData
+            endpoint="orders"
+            fileName="orders"
+            buttonText="导出订单"
+          />
+          <ExportData
+            endpoint="products"
+            fileName="products"
+            buttonText="导出商品"
+          />
+          <ExportData
+            endpoint="users"
+            fileName="users"
+            buttonText="导出用户"
+          />
+        </div>
+      </div>
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

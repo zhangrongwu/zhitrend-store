@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
+import ProductRecommendations from '../components/ProductRecommendations';
+import { useEffect } from 'react';
+import RatingStars from '../components/RatingStars';
+import RatingList from '../components/RatingList';
 
 interface Product {
   id: number;
@@ -20,6 +24,22 @@ export default function ProductDetail() {
       return response.json();
     },
   });
+
+  useEffect(() => {
+    if (product) {
+      fetch('http://localhost:8787/api/behaviors', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          actionType: 'view',
+        }),
+      }).catch(console.error);
+    }
+  }, [product]);
 
   if (isLoading) return <div>Loading...</div>;
   if (!product) return <div>Product not found</div>;
@@ -54,6 +74,16 @@ export default function ProductDetail() {
               加入购物车
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">商品评价</h2>
+            <RatingList productId={Number(id)} />
+          </div>
+          <ProductRecommendations />
         </div>
       </div>
     </div>

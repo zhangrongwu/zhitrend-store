@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Alert from '../../components/Alert';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import ImportData from '../../components/ImportData';
 
 interface Product {
   id: number;
@@ -166,6 +167,19 @@ export default function ProductManagement() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-bold">产品管理</h2>
+        <ImportData
+          endpoint="products"
+          templateUrl="/templates/products-import-template.csv"
+          buttonText="批量导入"
+          onSuccess={() => {
+            queryClient.invalidateQueries(['products']);
+            setAlert({ type: 'success', message: '批量导入完成' });
+          }}
+        />
+      </div>
+
       <Alert
         show={!!alert}
         type={alert?.type || 'success'}

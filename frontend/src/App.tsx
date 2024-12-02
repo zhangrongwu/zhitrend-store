@@ -16,6 +16,10 @@ import CategoryManagement from './pages/Admin/CategoryManagement';
 import Favorites from './pages/Favorites';
 import Dashboard from './pages/Admin/Dashboard';
 import SalesReport from './pages/Admin/SalesReport';
+import InventoryManagement from './pages/Admin/InventoryManagement';
+import UserAnalytics from './pages/Admin/UserAnalytics';
+import Reports from './pages/Admin/Reports';
+import MarketingManagement from './pages/Admin/MarketingManagement';
 
 const queryClient = new QueryClient();
 
@@ -101,6 +105,38 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <SalesReport />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/inventory" 
+                element={
+                  <ProtectedRoute>
+                    <InventoryManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/analytics" 
+                element={
+                  <ProtectedRoute>
+                    <UserAnalytics />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/reports" 
+                element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/marketing" 
+                element={
+                  <ProtectedRoute>
+                    <MarketingManagement />
                   </ProtectedRoute>
                 } 
               />
