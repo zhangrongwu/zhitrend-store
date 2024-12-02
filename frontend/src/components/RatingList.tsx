@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import RatingStars from './RatingStars';
-import { ThumbUpIcon } from '@heroicons/react/24/outline';
-import { ThumbUpIcon as ThumbUpSolidIcon } from '@heroicons/react/24/solid';
+import { HandThumbUpIcon as ThumbUpIcon } from '@heroicons/react/24/outline';
+import { HandThumbUpIcon as ThumbUpSolidIcon } from '@heroicons/react/24/solid';
 import { useState } from 'react';
 
 interface Rating {
@@ -69,7 +69,7 @@ export default function RatingList({ productId }: RatingListProps) {
         },
         body: JSON.stringify({ content }),
       });
-      if (!response.ok) throw new Error('Failed to reply to rating');
+      if (!response.ok) throw new Error('Failed to reply');
       return response.json();
     },
     onSuccess: () => {
@@ -93,44 +93,45 @@ export default function RatingList({ productId }: RatingListProps) {
   return (
     <div className="space-y-8">
       {ratings?.map((rating) => (
-        <div key={rating.id} className="border-b border-gray-200 pb-8">
-          <div className="flex items-start justify-between">
-            <div>
+        <div key={rating.id} className="bg-white p-6 rounded-lg shadow">
+          <div className="flex items-start">
+            <div className="flex-1">
               <div className="flex items-center">
-                <span className="font-medium mr-2">{rating.user_name}</span>
+                <span className="font-medium text-gray-900">{rating.user_name}</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  {new Date(rating.created_at).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="mt-1">
                 <RatingStars rating={rating.score} size="sm" />
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date(rating.created_at).toLocaleString()}
-              </p>
+              <p className="mt-2 text-gray-600">{rating.comment}</p>
             </div>
             <button
               onClick={() => handleLike(rating.id)}
-              className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+              className="flex items-center space-x-1 text-gray-500 hover:text-gray-700"
             >
               {rating.is_liked ? (
                 <ThumbUpSolidIcon className="h-5 w-5 text-indigo-600" />
               ) : (
                 <ThumbUpIcon className="h-5 w-5" />
               )}
-              <span className="ml-1">{rating.likes_count}</span>
+              <span>{rating.likes_count}</span>
             </button>
           </div>
-
-          <p className="mt-4 text-gray-700">{rating.comment}</p>
 
           {/* 回复列表 */}
           {rating.replies.length > 0 && (
             <div className="mt-4 pl-6 space-y-4">
               {rating.replies.map((reply) => (
-                <div key={reply.id} className="bg-gray-50 p-4 rounded-lg">
+                <div key={reply.id} className="bg-gray-50 p-4 rounded">
                   <div className="flex items-center">
-                    <span className="font-medium text-sm">{reply.user_name}</span>
-                    <span className="text-xs text-gray-500 ml-2">
-                      {new Date(reply.created_at).toLocaleString()}
+                    <span className="font-medium text-gray-900">{reply.user_name}</span>
+                    <span className="ml-2 text-sm text-gray-500">
+                      {new Date(reply.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-gray-700">{reply.content}</p>
+                  <p className="mt-2 text-gray-600">{reply.content}</p>
                 </div>
               ))}
             </div>
