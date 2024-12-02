@@ -630,11 +630,13 @@ app.get('/api/admin/users', adminAuth, async (c) => {
   const { DB } = c.env;
   
   try {
-    const users = await DB.prepare(
-      'SELECT id, email, name, role, created_at FROM users'
-    ).all();
+    const users = await DB.prepare(`
+      SELECT id, email, name, role, created_at
+      FROM users
+      ORDER BY created_at DESC
+    `).all();
     
-    return c.json(users);
+    return c.json(users.results);
   } catch (error) {
     return c.json({ error: 'Failed to fetch users' }, 500);
   }
@@ -646,6 +648,11 @@ app.put('/api/admin/users/:id/role', adminAuth, async (c) => {
   const { role } = await c.req.json();
   
   try {
+    // 验证角色值
+    if (!['admin', 'user'].includes(role)) {
+      return c.json({ error: 'Invalid role' }, 400);
+    }
+    
     await DB.prepare('UPDATE users SET role = ? WHERE id = ?')
       .bind(role, userId)
       .run();
@@ -1996,7 +2003,7 @@ app.get('/api/admin/analytics/products', adminAuth, async (c) => {
       ORDER BY MIN(p.price)
     `).all();
 
-    // 浏览转化分析
+    // 浏���转化分析
     const viewToCartRate = await DB.prepare(`
       WITH product_views AS (
         SELECT 

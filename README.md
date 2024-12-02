@@ -1,6 +1,6 @@
 # 电商系统
 
-一个基于 React + Cloudflare Workers 的现代电商系统。
+一个基于 React + Cloudflare Workers 的现代电商系统。初创公司/个人独立站最好的组合
 
 ## 功能特点
 
