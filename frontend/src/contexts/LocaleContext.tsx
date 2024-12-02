@@ -1,42 +1,48 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import zhCN from '../locales/zh-CN';
-import enUS from '../locales/en-US';
 
-type Locale = 'zh-CN' | 'en-US';
-type Messages = typeof zhCN;
+type Locale = 'zh-CN';
 
 interface LocaleContextType {
   locale: Locale;
-  messages: Messages;
   setLocale: (locale: Locale) => void;
+  t: (key: string) => string;
 }
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
-const locales = {
+const messages = {
   'zh-CN': zhCN,
-  'en-US': enUS,
 };
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(() => {
-    const savedLocale = localStorage.getItem('locale') as Locale;
-    return savedLocale || 'zh-CN';
-  });
+  const [locale, setLocale] = useState<Locale>('zh-CN');
 
-  const handleSetLocale = (newLocale: Locale) => {
-    setLocale(newLocale);
-    localStorage.setItem('locale', newLocale);
+  const t = (key: string): string => {
+    try {
+      const keys = key.split('.');
+      let value: any = messages[locale];
+      
+      for (const k of keys) {
+        if (value === undefined) return key;
+        value = value[k];
+      }
+      
+      return value || key;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return key;
+    }
+  };
+
+  const value = {
+    locale,
+    setLocale,
+    t,
   };
 
   return (
-    <LocaleContext.Provider 
-      value={{ 
-        locale, 
-        messages: locales[locale], 
-        setLocale: handleSetLocale 
-      }}
-    >
+    <LocaleContext.Provider value={value}>
       {children}
     </LocaleContext.Provider>
   );
@@ -44,7 +50,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
 export function useLocale() {
   const context = useContext(LocaleContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useLocale must be used within a LocaleProvider');
   }
   return context;

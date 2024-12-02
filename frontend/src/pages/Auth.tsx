@@ -21,14 +21,15 @@ export default function Auth() {
     try {
       if (isLogin) {
         await login({ email, password });
+        navigate('/');
       } else {
         await register({ email, password, name });
+        navigate('/');
       }
-      navigate('/');
     } catch (error) {
       setAlert({
         type: 'error',
-        message: error instanceof Error ? error.message : t('operationFailed'),
+        message: error instanceof Error ? error.message : '操作失败，请重试',
       });
     }
   };
@@ -48,18 +49,18 @@ export default function Auth() {
           <img
             className="mx-auto h-12 w-auto"
             src="/images/logo.svg"
-            alt={t('brandName')}
+            alt="智潮商城"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isLogin ? t('welcomeBack') : t('createAccount')}
+            {isLogin ? '欢迎回来' : '创建新账户'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {isLogin ? t('noAccount') : t('hasAccount')}{' '}
+            {isLogin ? '还没有账户？' : '已有账户？'}{' '}
             <button
               onClick={() => setIsLogin(!isLogin)}
               className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition duration-150 ease-in-out"
             >
-              {isLogin ? t('registerNow') : t('loginNow')}
+              {isLogin ? '立即注册' : '立即登录'}
             </button>
           </p>
         </motion.div>
@@ -88,7 +89,7 @@ export default function Auth() {
                 transition={{ duration: 0.3 }}
               >
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  {t('username')}
+                  用户名
                 </label>
                 <div className="mt-1">
                   <input
@@ -99,7 +100,7 @@ export default function Auth() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder={t('usernamePlaceholder')}
+                    placeholder="请输入用户名"
                   />
                 </div>
               </motion.div>
@@ -107,7 +108,7 @@ export default function Auth() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                {t('email')}
+                邮箱地址
               </label>
               <div className="mt-1">
                 <input
@@ -119,14 +120,14 @@ export default function Auth() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder={t('emailPlaceholder')}
+                  placeholder="请输入邮箱地址"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                {t('password')}
+                密码
               </label>
               <div className="mt-1">
                 <input
@@ -138,7 +139,7 @@ export default function Auth() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder={t('passwordPlaceholder')}
+                  placeholder="请输入密码"
                 />
               </div>
             </div>
@@ -150,7 +151,7 @@ export default function Auth() {
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                {isLogin ? t('login') : t('register')}
+                {isLogin ? '登录' : '注册'}
               </motion.button>
             </div>
           </form>
@@ -162,7 +163,7 @@ export default function Auth() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  {t('otherLoginMethods')}
+                  其他登录方式
                 </span>
               </div>
             </div>
@@ -174,9 +175,9 @@ export default function Auth() {
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
-                <span className="sr-only">{t('wechatLogin')}</span>
+                <span className="sr-only">微信登录</span>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.07 16.316c-.42 0-.819-.04-1.197-.122L4.21 17.497l.637-2.105c-1.175-.857-1.876-1.958-1.876-3.125 0-2.392 2.277-4.333 5.098-4.333 2.503 0 4.687 1.525 5.127 3.593-.174-.027-.35-.04-.527-.04-2.32 0-4.2 1.732-4.2 3.867 0 .355.054.698.155 1.026-.17-.04-.347-.064-.527-.064zM20.5 19l.823-2.67c.952-.695 1.677-1.708 1.677-2.83 0-2.392-2.277-4.333-5.098-4.333-2.82 0-5.098 1.94-5.098 4.333 0 2.392 2.277 4.333 5.098 4.333.642 0 1.257-.074 1.82-.213l2.657.87-.879-2.49z"/>
+                  <path d="M8.07 16.57C6.8 16.57 5.76 15.54 5.76 14.25S6.79 11.93 8.07 11.93 10.38 12.96 10.38 14.25 9.34 16.57 8.07 16.57M16.03 16.57C14.76 16.57 13.72 15.54 13.72 14.25S14.75 11.93 16.03 11.93 18.34 12.96 18.34 14.25 17.3 16.57 16.03 16.57M12.05 4C6.33 4 1.69 7.8 1.69 12.44C1.69 15.08 3.05 17.46 5.25 19.07C5.5 19.26 5.61 19.59 5.54 19.91L5.06 21.92C5 22.23 5.27 22.5 5.57 22.42L7.85 21.58C8.08 21.5 8.33 21.5 8.55 21.61C9.66 22 10.87 22.21 12.05 22.21 17.77 22.21 22.41 18.41 22.41 13.77 22.41 9.13 17.77 4 12.05 4" />
                 </svg>
               </motion.button>
 
@@ -186,9 +187,9 @@ export default function Auth() {
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
-                <span className="sr-only">{t('alipayLogin')}</span>
+                <span className="sr-only">支付宝登录</span>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.422 15.358c-1.037-.803-2.38-1.478-3.737-2.115-1.343-.637-2.686-1.235-4.028-1.833-.536-.24-1.073-.48-1.61-.72.134-.48.268-.96.402-1.44.335-1.2.67-2.4 1.005-3.6h2.515V4.41h-3.22l.402-1.44H9.93l-.402 1.44H6.31v1.2h2.917l-.938 3.36H5.37v1.2h2.515c-.134.48-.268.96-.402 1.44-.335 1.2-.67 2.4-1.005 3.6H3.96v1.2h2.112c.134-.48.268-.96.402-1.44h3.22l-.402 1.44h3.22l.402-1.44h3.22c-.134.48-.268.96-.402 1.44h2.515v-1.2h-2.112c.134-.48.268-.96.402-1.44h3.22v-1.2h-2.917l.938-3.36h2.917v-1.2h-2.515l.402-1.44h-3.22l-.402 1.44H9.93l.402-1.44H7.113l-.402 1.44H4.295v1.2h2.112l-.938 3.36H2.552v1.2h2.515c-.134.48-.268.96-.402 1.44-.335 1.2-.67 2.4-1.005 3.6h2.515v-1.2H3.557l.938-3.36h3.22l-.402 1.44h3.22l.402-1.44h3.22l-.402 1.44h3.22l.402-1.44h3.22l-.938 3.36h-2.515v1.2h2.112c-.134.48-.268.96-.402 1.44h2.515v-1.2z"/>
+                  <path d="M7.85 14.09C7.85 14.09 9.85 16.9 13.39 16.9C15.95 16.9 18.53 15.53 18.53 13.53C18.53 10.96 15.96 10.78 15.96 10.78C14.27 10.78 11.92 11.24 11.92 12.62C11.92 13.94 13.67 14.47 13.67 14.47L7.85 14.09M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" />
                 </svg>
               </motion.button>
 
@@ -198,7 +199,7 @@ export default function Auth() {
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
-                <span className="sr-only">{t('phoneLogin')}</span>
+                <span className="sr-only">手机号登录</span>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>

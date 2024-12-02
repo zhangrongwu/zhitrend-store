@@ -33,28 +33,11 @@ self.addEventListener('activate', (event) => {
 // 处理请求
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // 如果在缓存中找到响应，则返回缓存的版本
-      if (response) {
-        return response;
-      }
-
-      // 否则发送网络请求
-      return fetch(event.request).then((response) => {
-        // 检查是否收到有效的响应
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-
-        // 克隆响应
-        const responseToCache = response.clone();
-
-        // 将响应添加到缓存
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
-        return response;
+    fetch(event.request).catch(error => {
+      console.log('Fetch error:', error);
+      return new Response('Network error', {
+        status: 500,
+        headers: { 'Content-Type': 'text/plain' },
       });
     })
   );
