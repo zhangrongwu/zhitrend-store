@@ -43,7 +43,7 @@ export default function CategoryManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories']);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       resetForm();
       setAlert({ type: 'success', message: '分类创建成功！' });
     },
@@ -66,7 +66,7 @@ export default function CategoryManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories']);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       resetForm();
       setAlert({ type: 'success', message: '分类更新成功！' });
     },
@@ -87,7 +87,7 @@ export default function CategoryManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['categories']);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       setAlert({ type: 'success', message: '分类删除成功！' });
     },
     onError: () => {

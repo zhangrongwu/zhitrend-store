@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import PaymentForm from '../components/PaymentForm';
 import ReviewForm from '../components/ReviewForm';
+import Alert from '../components/Alert';
 
 interface OrderItem {
   id: number;
@@ -35,6 +36,7 @@ export default function OrderDetail() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState<{ productId: number; orderId: number } | null>(null);
   const queryClient = useQueryClient();
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const { data: order, isLoading } = useQuery<Order>({
     queryKey: ['order', id],
@@ -199,6 +201,13 @@ export default function OrderDetail() {
           }}
         />
       )}
+
+      <Alert
+        show={!!alert}
+        type={alert?.type || 'success'}
+        message={alert?.message || ''}
+        onClose={() => setAlert(null)}
+      />
     </div>
   );
 } 

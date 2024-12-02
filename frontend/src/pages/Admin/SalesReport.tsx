@@ -44,6 +44,13 @@ export default function SalesReport() {
 
   if (isLoading) return <div>Loading...</div>;
 
+  const averageOrderValue = salesData?.daily.length ? (
+    Math.round(
+      salesData.daily.reduce((sum, day) => sum + day.sales, 0) /
+      salesData.daily.reduce((sum, day) => sum + day.orders, 0)
+    ).toLocaleString()
+  ) : '0';
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -161,10 +168,7 @@ export default function SalesReport() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">平均客单价</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    ¥{Math.round(
-                      salesData?.daily.reduce((sum, day) => sum + day.sales, 0) /
-                      salesData?.daily.reduce((sum, day) => sum + day.orders, 0)
-                    ).toLocaleString()}
+                    ¥{averageOrderValue}
                   </dd>
                 </dl>
               </div>

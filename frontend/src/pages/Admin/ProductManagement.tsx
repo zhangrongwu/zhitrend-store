@@ -5,8 +5,8 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImportData from '../../components/ImportData';
 import ImageCompressor from '../../components/ImageCompressor';
 
-interface Product {
-  id: number;
+interface ProductData {
+  id?: number;
   name: string;
   description: string;
   price: number;
@@ -18,12 +18,12 @@ export default function ProductManagement() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
   const queryClient = useQueryClient();
 
-  const { data: products, isLoading } = useQuery<Product[]>({
+  const { data: products, isLoading } = useQuery<ProductData[]>({
     queryKey: ['products'],
     queryFn: async () => {
       const response = await fetch('http://localhost:8787/api/products');
@@ -49,7 +49,7 @@ export default function ProductManagement() {
   });
 
   const createProductMutation = useMutation({
-    mutationFn: async (productData: Partial<Product>) => {
+    mutationFn: async (productData: Partial<ProductData>) => {
       const response = await fetch('http://localhost:8787/api/products', {
         method: 'POST',
         headers: {
@@ -72,7 +72,7 @@ export default function ProductManagement() {
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: async (product: Product) => {
+    mutationFn: async (product: ProductData) => {
       const response = await fetch(`http://localhost:8787/api/products/${product.id}`, {
         method: 'PUT',
         headers: {
@@ -124,34 +124,29 @@ export default function ProductManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    const productData: ProductData = {
+      name,
+      description,
+      price: Number(price),
+      image: image ? await uploadImage(image) : editingProduct?.image || '',
+    };
+
     try {
-      let imageUrl = editingProduct?.image;
-      
-      if (image) {
-        const uploadResult = await uploadMutation.mutateAsync(image);
-        imageUrl = uploadResult.url;
-      }
-
-      const productData = {
-        name,
-        description,
-        price: parseFloat(price),
-        image: imageUrl,
-      };
-
       if (editingProduct) {
-        await updateProductMutation.mutateAsync({ ...productData, id: editingProduct.id });
+        await updateProductMutation.mutateAsync({ 
+          ...productData, 
+          id: editingProduct.id,
+          image: productData.image
+        });
       } else {
         await createProductMutation.mutateAsync(productData);
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      setAlert({ type: 'error', message: '操作失败，请重试。' });
+      setAlert({ type: 'error', message: '操作失败，请重试' });
     }
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: ProductData) => {
     setEditingProduct(product);
     setName(product.name);
     setDescription(product.description);

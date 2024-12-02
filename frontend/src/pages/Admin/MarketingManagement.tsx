@@ -48,32 +48,26 @@ export default function MarketingManagement() {
   });
 
   // 获取优惠券列表
-  const { data: coupons } = useQuery<Coupon[]>({
+  const { data: coupons, isLoading: couponsLoading } = useQuery<Coupon[]>({
     queryKey: ['coupons'],
     queryFn: async () => {
-      const response = await fetch('http://localhost:8787/api/admin/coupons', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await fetch('http://localhost:8787/api/coupons');
       if (!response.ok) throw new Error('Failed to fetch coupons');
       return response.json();
     },
   });
 
   // 获取自动化规则列表
-  const { data: rules } = useQuery<AutomationRule[]>({
+  const { data: rules, isLoading: rulesLoading } = useQuery<AutomationRule[]>({
     queryKey: ['automation-rules'],
     queryFn: async () => {
-      const response = await fetch('http://localhost:8787/api/admin/automation-rules', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch automation rules');
+      const response = await fetch('http://localhost:8787/api/automation-rules');
+      if (!response.ok) throw new Error('Failed to fetch rules');
       return response.json();
     },
   });
+
+  if (couponsLoading || rulesLoading) return <div>Loading...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
