@@ -1,0 +1,12 @@
+name = "backend"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "my_store"
+database_id = "xxxx"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "my-store-bucket" 
