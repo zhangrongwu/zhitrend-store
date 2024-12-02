@@ -721,4 +721,233 @@ app.delete('/api/categories/:id', adminAuth, async (c) => {
   }
 });
 
+// 收藏API
+app.post('/api/favorites', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const { productId } = await c.req.json();
+  
+  try {
+    await DB.prepare(
+      'INSERT INTO favorites (user_id, product_id) VALUES (?, ?)'
+    )
+    .bind(userId, productId)
+    .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to add favorite' }, 500);
+  }
+});
+
+app.delete('/api/favorites/:productId', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const productId = c.req.param('productId');
+  
+  try {
+    await DB.prepare(
+      'DELETE FROM favorites WHERE user_id = ? AND product_id = ?'
+    )
+    .bind(userId, productId)
+    .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to remove favorite' }, 500);
+  }
+});
+
+app.get('/api/favorites', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  
+  try {
+    const favorites = await DB.prepare(`
+      SELECT p.*, f.created_at as favorited_at
+      FROM favorites f
+      JOIN products p ON f.product_id = p.id
+      WHERE f.user_id = ?
+      ORDER BY f.created_at DESC
+    `)
+    .bind(userId)
+    .all();
+    
+    return c.json(favorites);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch favorites' }, 500);
+  }
+});
+
+app.get('/api/favorites/check/:productId', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const productId = c.req.param('productId');
+  
+  try {
+    const favorite = await DB.prepare(
+      'SELECT id FROM favorites WHERE user_id = ? AND product_id = ?'
+    )
+    .bind(userId, productId)
+    .first();
+    
+    return c.json({ isFavorited: !!favorite });
+  } catch (error) {
+    return c.json({ error: 'Failed to check favorite status' }, 500);
+  }
+});
+
+// 管理员统计API
+app.get('/api/admin/stats', adminAuth, async (c) => {
+  const { DB } = c.env;
+  
+  try {
+    // 获取总用户数
+    const totalUsers = await DB.prepare(
+      'SELECT COUNT(*) as count FROM users'
+    ).first();
+
+    // 获取总订单数和总收入
+    const orderStats = await DB.prepare(`
+      SELECT 
+        COUNT(*) as total_orders,
+        SUM(total_amount) as total_revenue,
+        AVG(total_amount) as avg_order_value
+      FROM orders
+      WHERE status != 'cancelled'
+    `).first();
+
+    // 获取最近订单
+    const recentOrders = await DB.prepare(`
+      SELECT id, total_amount, status, created_at
+      FROM orders
+      ORDER BY created_at DESC
+      LIMIT 5
+    `).all();
+
+    // 获取热销商品
+    const topProducts = await DB.prepare(`
+      SELECT 
+        p.id,
+        p.name,
+        COUNT(oi.id) as sales
+      FROM products p
+      JOIN order_items oi ON p.id = oi.product_id
+      JOIN orders o ON oi.order_id = o.id
+      WHERE o.status != 'cancelled'
+      GROUP BY p.id
+      ORDER BY sales DESC
+      LIMIT 5
+    `).all();
+
+    return c.json({
+      totalUsers: totalUsers.count,
+      totalOrders: orderStats.total_orders,
+      totalRevenue: orderStats.total_revenue,
+      averageOrderValue: orderStats.avg_order_value,
+      recentOrders: recentOrders.results,
+      topProducts: topProducts.results,
+    });
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch stats' }, 500);
+  }
+});
+
+// 销售报表API
+app.get('/api/admin/sales-report', adminAuth, async (c) => {
+  const { DB } = c.env;
+  const range = c.req.query('range') || '30days';
+  
+  try {
+    let dateFilter;
+    switch (range) {
+      case '7days':
+        dateFilter = "datetime('now', '-7 days')";
+        break;
+      case '30days':
+        dateFilter = "datetime('now', '-30 days')";
+        break;
+      case '12months':
+        dateFilter = "datetime('now', '-12 months')";
+        break;
+      default:
+        dateFilter = "datetime('now', '-30 days')";
+    }
+
+    // 获取每日销售数据
+    const daily = await DB.prepare(`
+      SELECT 
+        date(created_at) as date,
+        COUNT(*) as orders,
+        SUM(total_amount) as sales
+      FROM orders
+      WHERE created_at >= ${dateFilter}
+        AND status != 'cancelled'
+      GROUP BY date(created_at)
+      ORDER BY date
+    `).all();
+
+    // 获取每月销售数据
+    const monthly = await DB.prepare(`
+      SELECT 
+        strftime('%Y-%m', created_at) as month,
+        COUNT(*) as orders,
+        SUM(total_amount) as sales
+      FROM orders
+      WHERE created_at >= ${dateFilter}
+        AND status != 'cancelled'
+      GROUP BY strftime('%Y-%m', created_at)
+      ORDER BY month
+    `).all();
+
+    // 获取分类销售统计
+    const categoryStats = await DB.prepare(`
+      SELECT 
+        c.name as category,
+        SUM(oi.quantity * oi.price) as sales,
+        ROUND(SUM(oi.quantity * oi.price) * 100.0 / (
+          SELECT SUM(quantity * price)
+          FROM order_items oi2
+          JOIN orders o2 ON oi2.order_id = o2.id
+          WHERE o2.created_at >= ${dateFilter}
+            AND o2.status != 'cancelled'
+        ), 2) as percentage
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      JOIN products p ON oi.product_id = p.id
+      JOIN categories c ON p.category_id = c.id
+      WHERE o.created_at >= ${dateFilter}
+        AND o.status != 'cancelled'
+      GROUP BY c.id
+      ORDER BY sales DESC
+    `).all();
+
+    // 获取热销商品
+    const topSellingProducts = await DB.prepare(`
+      SELECT 
+        p.id,
+        p.name,
+        SUM(oi.quantity) as sales,
+        SUM(oi.quantity * oi.price) as revenue
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      JOIN products p ON oi.product_id = p.id
+      WHERE o.created_at >= ${dateFilter}
+        AND o.status != 'cancelled'
+      GROUP BY p.id
+      ORDER BY sales DESC
+      LIMIT 5
+    `).all();
+
+    return c.json({
+      daily: daily.results,
+      monthly: monthly.results,
+      categoryStats: categoryStats.results,
+      topSellingProducts: topSellingProducts.results,
+    });
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch sales report' }, 500);
+  }
+});
+
 export default app; 

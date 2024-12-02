@@ -72,4 +72,15 @@ CREATE TABLE categories (
   name TEXT NOT NULL,
   description TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 商品收藏表
+CREATE TABLE favorites (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  product_id INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (product_id) REFERENCES products(id),
+  UNIQUE(user_id, product_id)
 ); 

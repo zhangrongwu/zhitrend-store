@@ -13,6 +13,9 @@ import OrderDetail from './pages/OrderDetail';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import CategoryManagement from './pages/Admin/CategoryManagement';
+import Favorites from './pages/Favorites';
+import Dashboard from './pages/Admin/Dashboard';
+import SalesReport from './pages/Admin/SalesReport';
 
 const queryClient = new QueryClient();
 
@@ -74,6 +77,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CategoryManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/favorites" 
+                element={
+                  <ProtectedRoute>
+                    <Favorites />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/sales" 
+                element={
+                  <ProtectedRoute>
+                    <SalesReport />
                   </ProtectedRoute>
                 } 
               />
