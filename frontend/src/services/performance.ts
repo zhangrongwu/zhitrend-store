@@ -1,3 +1,8 @@
+interface ResourceEntry extends PerformanceEntry {
+  initiatorType: string;
+  transferSize: number;
+}
+
 export function initPerformanceMonitoring() {
   // 创建一个队列来批量处理性能数据
   let metricsQueue: any[] = [];
@@ -52,25 +57,26 @@ export function initPerformanceMonitoring() {
   const processedResources = new Set();
   const observer = new PerformanceObserver((list) => {
     list.getEntries().forEach((entry) => {
-      // 只处理未处理过的资源
       if (entry.entryType === 'resource' && !processedResources.has(entry.name)) {
         processedResources.add(entry.name);
         
+        const resourceEntry = entry as ResourceEntry;
+        
         // 忽略性能监控相关的请求
-        if (entry.name.includes('/api/performance')) {
+        if (resourceEntry.name.includes('/api/performance')) {
           return;
         }
 
         // 只监控重要资源
         const importantTypes = ['script', 'css', 'img', 'fetch'];
-        if (importantTypes.includes(entry.initiatorType)) {
+        if (importantTypes.includes(resourceEntry.initiatorType)) {
           queueMetrics({
             type: 'resource',
             metrics: {
-              name: entry.name,
-              duration: entry.duration,
-              transferSize: entry.transferSize,
-              initiatorType: entry.initiatorType,
+              name: resourceEntry.name,
+              duration: resourceEntry.duration,
+              transferSize: resourceEntry.transferSize,
+              initiatorType: resourceEntry.initiatorType,
             }
           });
         }

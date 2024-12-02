@@ -1,18 +1,18 @@
 import React from 'react';
 
-export function lazyLoad<T extends { default: React.ComponentType<any> }>(importFn: () => Promise<T>) {
+export function lazyLoad<T extends { default: React.ComponentType<any> }>(importFn: () => Promise<T>): React.LazyExoticComponent<T['default']> {
   return React.lazy(() => {
     const minimumDelay = 300;
     const startTime = Date.now();
 
-    return importFn().then(result => {
+    return importFn().then((module) => {
       const timeElapsed = Date.now() - startTime;
       if (timeElapsed < minimumDelay) {
-        return new Promise(resolve => {
-          setTimeout(() => resolve(result), minimumDelay - timeElapsed);
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(module), minimumDelay - timeElapsed);
         });
       }
-      return result;
+      return module;
     });
   });
 }
@@ -21,7 +21,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);

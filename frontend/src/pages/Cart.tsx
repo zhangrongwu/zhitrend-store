@@ -4,6 +4,7 @@ import Alert from '../components/Alert';
 import { useState } from 'react';
 import CheckoutForm from '../components/CheckoutForm';
 import { Link } from 'react-router-dom';
+import { createQueryKey } from '../types/query';
 
 interface CartItem {
   id: number;
@@ -46,8 +47,8 @@ export default function Cart() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['cart']);
-      queryClient.invalidateQueries(['cartCount']);
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries(createQueryKey(['cartCount']));
     },
   });
 
@@ -63,8 +64,8 @@ export default function Cart() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['cart']);
-      queryClient.invalidateQueries(['cartCount']);
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries(createQueryKey(['cartCount']));
       setAlert({ type: 'success', message: '商品已从购物车中移除' });
     },
   });
@@ -88,7 +89,8 @@ export default function Cart() {
     }
   };
 
-  const total = cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+  const total = cartItems?.reduce((sum: number, item: CartItem) => 
+    sum + item.price * item.quantity, 0) || 0;
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -202,7 +204,7 @@ export default function Cart() {
                     to="/products"
                     className="font-medium text-indigo-600 hover:text-indigo-500"
                   >
-                    继续���物
+                    继续购物
                   </Link>
                 </p>
               </div>
@@ -215,8 +217,8 @@ export default function Cart() {
             onClose={() => setShowCheckoutForm(false)}
             onSuccess={() => {
               setShowCheckoutForm(false);
-              queryClient.invalidateQueries(['cart']);
-              queryClient.invalidateQueries(['cartCount']);
+              queryClient.invalidateQueries({ queryKey: ['cart'] });
+              queryClient.invalidateQueries(createQueryKey(['cartCount']));
             }}
           />
         )}

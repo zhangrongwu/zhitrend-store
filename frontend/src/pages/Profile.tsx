@@ -1,12 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Alert from '../components/Alert';
 
 interface User {
   id: number;
-  name: string;
   email: string;
-  created_at: string;
+  name: string;
 }
 
 export default function Profile() {
@@ -19,18 +18,23 @@ export default function Profile() {
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ['user'],
     queryFn: async () => {
-      const response = await fetch('http://localhost:8787/api/user/profile', {
+      const response = await fetch('http://localhost:8787/api/users/me', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch user profile');
-      return response.json();
-    },
-    onSuccess: (data) => {
+      if (!response.ok) throw new Error('Failed to fetch user');
+      const data = await response.json();
       setName(data.name);
+      return data;
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+    }
+  }, [user]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { name: string }) => {
@@ -46,7 +50,7 @@ export default function Profile() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['user']);
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       setAlert({ type: 'success', message: '个人信息更新成功！' });
     },
     onError: () => {

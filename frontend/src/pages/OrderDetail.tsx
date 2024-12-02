@@ -93,6 +93,24 @@ export default function OrderDetail() {
     }
   };
 
+  const handleConfirmReceipt = async () => {
+    try {
+      const response = await fetch(`http://localhost:8787/api/orders/${id}/confirm`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error('Failed to confirm receipt');
+      
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      setAlert({ type: 'success', message: '已确认收货' });
+    } catch (error) {
+      setAlert({ type: 'error', message: '确认收货失败，请重试' });
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -165,7 +183,7 @@ export default function OrderDetail() {
           onClose={() => setShowPaymentForm(false)}
           onSuccess={() => {
             setShowPaymentForm(false);
-            queryClient.invalidateQueries(['order', id]);
+            queryClient.invalidateQueries({ queryKey: ['order', id] });
           }}
         />
       )}
@@ -177,7 +195,7 @@ export default function OrderDetail() {
           onClose={() => setShowReviewForm(null)}
           onSuccess={() => {
             setShowReviewForm(null);
-            queryClient.invalidateQueries(['order', id]);
+            queryClient.invalidateQueries({ queryKey: ['order', id] });
           }}
         />
       )}

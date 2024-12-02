@@ -31,18 +31,18 @@ export default function Favorites() {
   });
 
   const removeFavoriteMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      const response = await fetch(`http://localhost:8787/api/favorites/${productId}`, {
+    mutationFn: async (id: number) => {
+      const response = await fetch(`http://localhost:8787/api/favorites/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      if (!response.ok) throw new Error('Failed to remove favorite');
+      if (!response.ok) throw new Error('Failed to remove from favorites');
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['favorites']);
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
       setAlert({ type: 'success', message: '已从收藏中移除' });
     },
     onError: () => {

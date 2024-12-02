@@ -1,12 +1,12 @@
-interface ErrorEvent {
+interface CustomErrorEvent {
   message: string;
   stack?: string;
+  userId?: string | null;
+  timestamp?: number;
+  userAgent?: string;
   url?: string;
   line?: number;
   column?: number;
-  timestamp: number;
-  userAgent: string;
-  userId?: string;
 }
 
 export function initErrorTracking() {
@@ -37,7 +37,7 @@ export function initErrorTracking() {
   });
 }
 
-async function reportError(error: ErrorEvent) {
+async function reportError(error: CustomErrorEvent) {
   try {
     await fetch('http://localhost:8787/api/errors', {
       method: 'POST',
