@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Alert from '../../components/Alert';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImportData from '../../components/ImportData';
+import ImageCompressor from '../../components/ImageCompressor';
 
 interface Product {
   id: number;
@@ -222,10 +223,11 @@ export default function ProductManagement() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">图片</label>
-              <input
-                type="file"
-                onChange={(e) => setImage(e.target.files?.[0] || null)}
-                className="mt-1 block w-full"
+              <ImageCompressor
+                onCompress={(compressedFile) => setImage(compressedFile)}
+                maxSizeMB={0.5}
+                maxWidthOrHeight={1200}
+                className="mt-1"
               />
             </div>
             <button
