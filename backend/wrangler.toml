@@ -1,6 +1,7 @@
 name = "backend"
 main = "src/index.ts"
 compatibility_date = "2023-01-01"
+node_compat = true
 
 [[d1_databases]]
 binding = "DB"
@@ -12,4 +13,7 @@ binding = "R2"
 bucket_name = "shop-uploads"
 
 [vars]
-JWT_SECRET = "your-jwt-secret" 
+JWT_SECRET = "your-jwt-secret"
+
+[build]
+command = "npm run build" 
