@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Cart from './pages/Cart';
 import OrderDetail from './pages/OrderDetail';
 import Orders from './pages/Orders';
+import Profile from './pages/Profile';
+import CategoryManagement from './pages/Admin/CategoryManagement';
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <OrderDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/categories" 
+                element={
+                  <ProtectedRoute>
+                    <CategoryManagement />
                   </ProtectedRoute>
                 } 
               />

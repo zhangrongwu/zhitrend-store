@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt';
 import { hashPassword, comparePasswords, generateToken } from './utils/auth';
+import { adminAuth } from './middleware/adminAuth';
 
 const app = new Hono();
 
@@ -469,6 +470,254 @@ app.post('/api/orders/:id/confirm', auth(), async (c) => {
     return c.json({ success: true });
   } catch (error) {
     return c.json({ error: 'Failed to confirm order' }, 500);
+  }
+});
+
+// 用户个人中心API
+app.get('/api/user/profile', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  
+  try {
+    const user = await DB.prepare(
+      'SELECT id, email, name, created_at FROM users WHERE id = ?'
+    )
+    .bind(userId)
+    .first();
+    
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    
+    return c.json(user);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch user profile' }, 500);
+  }
+});
+
+app.put('/api/user/profile', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const { name } = await c.req.json();
+  
+  try {
+    await DB.prepare('UPDATE users SET name = ? WHERE id = ?')
+      .bind(name, userId)
+      .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to update profile' }, 500);
+  }
+});
+
+app.put('/api/user/password', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const { currentPassword, newPassword } = await c.req.json();
+  
+  try {
+    const user = await DB.prepare('SELECT password_hash FROM users WHERE id = ?')
+      .bind(userId)
+      .first();
+    
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    
+    const isValid = await comparePasswords(currentPassword, user.password_hash);
+    if (!isValid) {
+      return c.json({ error: 'Invalid current password' }, 401);
+    }
+    
+    const newPasswordHash = await hashPassword(newPassword);
+    await DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+      .bind(newPasswordHash, userId)
+      .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to change password' }, 500);
+  }
+});
+
+// 评价API
+app.post('/api/reviews', auth(), async (c) => {
+  const { DB } = c.env;
+  const userId = c.get('jwtPayload').id;
+  const { productId, orderId, rating, content } = await c.req.json();
+  
+  try {
+    // 验证订单是否属于当前用户且已完成
+    const order = await DB.prepare(
+      'SELECT status FROM orders WHERE id = ? AND user_id = ?'
+    )
+    .bind(orderId, userId)
+    .first();
+    
+    if (!order || order.status !== 'completed') {
+      return c.json({ error: 'Cannot review this order' }, 400);
+    }
+    
+    // 检查是否已评价
+    const existingReview = await DB.prepare(
+      'SELECT id FROM reviews WHERE order_id = ? AND product_id = ?'
+    )
+    .bind(orderId, productId)
+    .first();
+    
+    if (existingReview) {
+      return c.json({ error: 'Already reviewed' }, 400);
+    }
+    
+    // 创建评价
+    await DB.prepare(
+      'INSERT INTO reviews (user_id, product_id, order_id, rating, content) VALUES (?, ?, ?, ?, ?)'
+    )
+    .bind(userId, productId, orderId, rating, content)
+    .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to create review' }, 500);
+  }
+});
+
+app.get('/api/products/:id/reviews', async (c) => {
+  const { DB } = c.env;
+  const productId = c.req.param('id');
+  
+  try {
+    const reviews = await DB.prepare(`
+      SELECT r.*, u.name as user_name 
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.product_id = ?
+      ORDER BY r.created_at DESC
+    `)
+    .bind(productId)
+    .all();
+    
+    return c.json(reviews);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch reviews' }, 500);
+  }
+});
+
+// 管理员API
+app.get('/api/admin/orders', adminAuth, async (c) => {
+  const { DB } = c.env;
+  
+  try {
+    const orders = await DB.prepare(`
+      SELECT o.*, 
+        GROUP_CONCAT(oi.quantity || 'x ' || p.name) as items
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      JOIN products p ON oi.product_id = p.id
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `)
+    .all();
+    
+    return c.json(orders);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch orders' }, 500);
+  }
+});
+
+app.get('/api/admin/users', adminAuth, async (c) => {
+  const { DB } = c.env;
+  
+  try {
+    const users = await DB.prepare(
+      'SELECT id, email, name, role, created_at FROM users'
+    ).all();
+    
+    return c.json(users);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch users' }, 500);
+  }
+});
+
+app.put('/api/admin/users/:id/role', adminAuth, async (c) => {
+  const { DB } = c.env;
+  const userId = c.req.param('id');
+  const { role } = await c.req.json();
+  
+  try {
+    await DB.prepare('UPDATE users SET role = ? WHERE id = ?')
+      .bind(role, userId)
+      .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to update user role' }, 500);
+  }
+});
+
+// 分类API
+app.get('/api/categories', async (c) => {
+  const { DB } = c.env;
+  
+  try {
+    const categories = await DB.prepare(
+      'SELECT * FROM categories ORDER BY name'
+    ).all();
+    
+    return c.json(categories);
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch categories' }, 500);
+  }
+});
+
+app.post('/api/categories', adminAuth, async (c) => {
+  const { DB } = c.env;
+  const { name, description } = await c.req.json();
+  
+  try {
+    const result = await DB.prepare(
+      'INSERT INTO categories (name, description) VALUES (?, ?)'
+    )
+    .bind(name, description)
+    .run();
+    
+    return c.json({ id: result.lastRowId });
+  } catch (error) {
+    return c.json({ error: 'Failed to create category' }, 500);
+  }
+});
+
+app.put('/api/categories/:id', adminAuth, async (c) => {
+  const { DB } = c.env;
+  const id = c.req.param('id');
+  const { name, description } = await c.req.json();
+  
+  try {
+    await DB.prepare(
+      'UPDATE categories SET name = ?, description = ? WHERE id = ?'
+    )
+    .bind(name, description, id)
+    .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to update category' }, 500);
+  }
+});
+
+app.delete('/api/categories/:id', adminAuth, async (c) => {
+  const { DB } = c.env;
+  const id = c.req.param('id');
+  
+  try {
+    await DB.prepare('DELETE FROM categories WHERE id = ?')
+      .bind(id)
+      .run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to delete category' }, 500);
   }
 });
 

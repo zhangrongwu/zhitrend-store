@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import PaymentForm from '../components/PaymentForm';
+import ReviewForm from '../components/ReviewForm';
 
 interface OrderItem {
   id: number;
@@ -32,6 +33,7 @@ const statusMap = {
 export default function OrderDetail() {
   const { id } = useParams();
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState<{ productId: number; orderId: number } | null>(null);
   const queryClient = useQueryClient();
 
   const { data: order, isLoading } = useQuery<Order>({
@@ -76,6 +78,16 @@ export default function OrderDetail() {
             确认收货
           </button>
         );
+      case 'completed':
+        return order.items.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setShowReviewForm({ productId: item.product_id, orderId: order.id })}
+            className="mt-4 w-full rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+          >
+            评价商品
+          </button>
+        ));
       default:
         return null;
     }
@@ -153,6 +165,18 @@ export default function OrderDetail() {
           onClose={() => setShowPaymentForm(false)}
           onSuccess={() => {
             setShowPaymentForm(false);
+            queryClient.invalidateQueries(['order', id]);
+          }}
+        />
+      )}
+
+      {showReviewForm && (
+        <ReviewForm
+          productId={showReviewForm.productId}
+          orderId={showReviewForm.orderId}
+          onClose={() => setShowReviewForm(null)}
+          onSuccess={() => {
+            setShowReviewForm(null);
             queryClient.invalidateQueries(['order', id]);
           }}
         />
