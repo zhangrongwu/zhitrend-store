@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt';
 import { hashPassword, comparePasswords, generateToken } from './utils/auth';
 import { adminAuth } from './middleware/adminAuth';
+import paymentCallbacks from './routes/paymentCallbacks';
 
 const app = new Hono();
 
@@ -2073,5 +2074,8 @@ app.post('/api/performance/batch', async (c) => {
     return c.json({ error: 'Failed to save performance metrics' }, 500);
   }
 });
+
+// 支付回调路由
+app.route('/api/callbacks', paymentCallbacks);
 
 export default app; 

@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 
 interface OrderItem {
   id: number;
@@ -70,7 +72,7 @@ export default function Orders() {
                           订单号：{order.id}
                         </h2>
                         <p className="text-sm text-gray-500">
-                          下单时间：{new Date(order.created_at).toLocaleString()}
+                          下单时间：{format(new Date(order.created_at), 'PPpp', { locale: zhCN })}
                         </p>
                       </div>
                       <span
@@ -110,13 +112,21 @@ export default function Orders() {
                       </div>
                     </div>
 
-                    <div className="mt-6 flex justify-end">
+                    <div className="mt-6 flex justify-end space-x-4">
                       <Link
                         to={`/orders/${order.id}`}
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                       >
                         查看详情
                       </Link>
+                      {order.status === 'pending' && (
+                        <Link
+                          to={`/orders/${order.id}/pay`}
+                          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                        >
+                          去支付
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

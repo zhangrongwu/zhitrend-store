@@ -202,7 +202,7 @@ export default function Cart() {
                     to="/products"
                     className="font-medium text-indigo-600 hover:text-indigo-500"
                   >
-                    继续购物
+                    继续���物
                   </Link>
                 </p>
               </div>
