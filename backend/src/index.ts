@@ -2003,7 +2003,7 @@ app.get('/api/admin/analytics/products', adminAuth, async (c) => {
       ORDER BY MIN(p.price)
     `).all();
 
-    // 浏���转化分析
+    // 浏转化分析
     const viewToCartRate = await DB.prepare(`
       WITH product_views AS (
         SELECT 
@@ -2047,6 +2047,30 @@ app.get('/api/admin/analytics/products', adminAuth, async (c) => {
     });
   } catch (error) {
     return c.json({ error: 'Failed to fetch product analytics' }, 500);
+  }
+});
+
+// 添加到现有的后端代码中
+app.post('/api/performance/batch', async (c) => {
+  const { DB } = c.env;
+  const metrics = await c.req.json();
+  
+  try {
+    // 批量插入性能数据
+    const promises = metrics.map(async (metric: any) => {
+      await DB.prepare(`
+        INSERT INTO performance_metrics (
+          type, metrics_data, created_at
+        ) VALUES (?, ?, datetime('now'))
+      `)
+      .bind(metric.type, JSON.stringify(metric.metrics))
+      .run();
+    });
+
+    await Promise.all(promises);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to save performance metrics' }, 500);
   }
 });
 
