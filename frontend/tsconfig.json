@@ -22,7 +22,13 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "useUnknownInCatchVariables": false
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

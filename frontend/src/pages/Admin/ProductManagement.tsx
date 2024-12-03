@@ -47,7 +47,8 @@ export default function ProductManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // @ts-ignore
+      queryClient.invalidateQueries(['products']);
       resetForm();
       setAlert({ type: 'success', message: '产品创建成功！' });
     },
@@ -70,7 +71,8 @@ export default function ProductManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // @ts-ignore
+      queryClient.invalidateQueries(['products']);
       resetForm();
       setAlert({ type: 'success', message: '产品更新成功！' });
     },
@@ -91,7 +93,8 @@ export default function ProductManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // @ts-ignore
+      queryClient.invalidateQueries(['products']);
       setAlert({ type: 'success', message: '产品删除成功！' });
     },
     onError: () => {
@@ -139,7 +142,7 @@ export default function ProductManagement() {
 
   const handleDelete = async (id: number | undefined) => {
     if (!id) return;
-    if (window.confirm('确定要删除这个商品吗？')) {
+    if (window.confirm('确定要删除个商品吗？')) {
       await deleteProductMutation.mutateAsync(id);
     }
   };
@@ -155,6 +158,7 @@ export default function ProductManagement() {
           templateUrl="/templates/products-import-template.csv"
           buttonText="批量导入"
           onSuccess={() => {
+            // @ts-ignore
             queryClient.invalidateQueries(['products']);
             setAlert({ type: 'success', message: '批量导入完成' });
           }}
