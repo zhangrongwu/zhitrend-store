@@ -3,10 +3,18 @@ import { Menu, Transition } from '@headlessui/react';
 import { GlobeAltIcon } from '@heroicons/react/24/outline';
 import { useLocale } from '../contexts/LocaleContext';
 
+type LocaleType = 'zh-CN' | 'en-US';
+
+interface LocaleContextType {
+  locale: LocaleType;
+  setLocale: (locale: LocaleType) => void;
+  t: (key: string) => string;
+}
+
 const locales = [
-  { code: 'zh-CN', name: '简体中文' },
-  { code: 'en-US', name: 'English' }
-];
+  { code: 'zh-CN' as const, name: '简体中文' },
+  { code: 'en-US' as const, name: 'English' }
+] as const;
 
 export default function LocaleToggle() {
   const { locale, setLocale } = useLocale();

@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import zhCN from '../locales/zh-CN';
+import enUS from '../locales/en-US';
 
-type Locale = 'zh-CN';
+type LocaleType = 'zh-CN' | 'en-US';
 
 interface LocaleContextType {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
+  locale: LocaleType;
+  setLocale: (locale: LocaleType) => void;
   t: (key: string) => string;
 }
 
@@ -13,10 +14,11 @@ const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
 const messages = {
   'zh-CN': zhCN,
+  'en-US': enUS,
 };
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>('zh-CN');
+  const [locale, setLocale] = useState<LocaleType>('zh-CN');
 
   const t = (key: string): string => {
     try {

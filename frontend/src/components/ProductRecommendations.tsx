@@ -34,11 +34,11 @@ export default function ProductRecommendations() {
   return (
     <div className="space-y-8">
       {/* 基于类别的推荐 */}
-      {recommendations?.categoryBased.length > 0 && (
+      {recommendations?.categoryBased?.length > 0 && (
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">为您推荐</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {recommendations.categoryBased.map((product) => (
+            {recommendations?.categoryBased?.map((product) => (
               <Link
                 key={product.id}
                 to={`/products/${product.id}`}
@@ -62,11 +62,11 @@ export default function ProductRecommendations() {
       )}
 
       {/* 热门商品 */}
-      {recommendations?.popular.length > 0 && (
+      {recommendations?.popular?.length > 0 && (
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">热门商品</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {recommendations.popular.map((product) => (
+            {recommendations?.popular?.map((product) => (
               <Link
                 key={product.id}
                 to={`/products/${product.id}`}
@@ -90,11 +90,11 @@ export default function ProductRecommendations() {
       )}
 
       {/* 相似商品 */}
-      {recommendations?.similar.length > 0 && (
+      {recommendations?.similar?.length > 0 && (
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">相似商品</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {recommendations.similar.map((product) => (
+            {recommendations?.similar?.map((product) => (
               <Link
                 key={product.id}
                 to={`/products/${product.id}`}

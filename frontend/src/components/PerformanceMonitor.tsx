@@ -7,6 +7,15 @@ interface Metrics {
   cls: number | null;
 }
 
+interface FIDEntry extends PerformanceEntry {
+  processingStart: number;
+}
+
+interface CLSEntry extends PerformanceEntry {
+  hadRecentInput: boolean;
+  value: number;
+}
+
 export default function PerformanceMonitor() {
   const [metrics, setMetrics] = useState<Metrics>({
     fcp: null,
@@ -40,7 +49,7 @@ export default function PerformanceMonitor() {
       const entries = list.getEntries();
       entries.forEach((entry) => {
         if (entry.name === 'first-input') {
-          setMetrics((prev) => ({ ...prev, fid: entry.processingStart - entry.startTime }));
+          setMetrics((prev) => ({ ...prev, fid: (entry as FIDEntry).processingStart - entry.startTime }));
         }
       });
     });
@@ -50,8 +59,8 @@ export default function PerformanceMonitor() {
     const clsObserver = new PerformanceObserver((list) => {
       let clsScore = 0;
       list.getEntries().forEach((entry) => {
-        if (!entry.hadRecentInput) {
-          clsScore += entry.value;
+        if (!(entry as CLSEntry).hadRecentInput) {
+          clsScore += (entry as CLSEntry).value;
         }
       });
       setMetrics((prev) => ({ ...prev, cls: clsScore }));

@@ -1,7 +1,6 @@
-import { useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import { useCallback, lazy, Suspense } from 'react';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+const ReactQuill = lazy(() => import('react-quill'));
 
 interface RichTextEditorProps {
   value: string;
@@ -15,20 +14,22 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   }, [onChange]);
 
   return (
-    <ReactQuill
-      theme="snow"
-      value={value}
-      onChange={handleChange}
-      placeholder={placeholder}
-      modules={{
-        toolbar: [
-          [{ header: [1, 2, false] }],
-          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'image'],
-          ['clean'],
-        ],
-      }}
-    />
+    <Suspense fallback={<div>Loading editor...</div>}>
+      <ReactQuill
+        theme="snow"
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder}
+        modules={{
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link', 'image'],
+            ['clean'],
+          ],
+        }}
+      />
+    </Suspense>
   );
 } 
