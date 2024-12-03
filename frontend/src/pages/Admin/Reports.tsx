@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChartBarIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import ExportData from '../../components/ExportData';
 
 interface ReportData {

@@ -69,7 +69,9 @@ export default function InventoryManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['inventory', 'inventory-logs']);
+      queryClient.invalidateQueries({ 
+        queryKey: ['inventory', 'inventory-logs'] 
+      });
       resetForm();
       setAlert({ type: 'success', message: '库存更新成功！' });
     },

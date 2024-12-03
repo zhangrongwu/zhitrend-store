@@ -4,6 +4,7 @@ import Alert from '../../components/Alert';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImportData from '../../components/ImportData';
 import ImageCompressor from '../../components/ImageCompressor';
+import { uploadImage } from '../../utils/upload';
 
 interface ProductData {
   id?: number;
@@ -28,22 +29,6 @@ export default function ProductManagement() {
     queryFn: async () => {
       const response = await fetch('http://localhost:8787/api/products');
       if (!response.ok) throw new Error('Failed to fetch products');
-      return response.json();
-    },
-  });
-
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const response = await fetch('http://localhost:8787/api/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error('Upload failed');
       return response.json();
     },
   });
@@ -132,11 +117,10 @@ export default function ProductManagement() {
     };
 
     try {
-      if (editingProduct) {
+      if (editingProduct?.id) {
         await updateProductMutation.mutateAsync({ 
           ...productData, 
-          id: editingProduct.id,
-          image: productData.image
+          id: editingProduct.id 
         });
       } else {
         await createProductMutation.mutateAsync(productData);
@@ -153,8 +137,9 @@ export default function ProductManagement() {
     setPrice(product.price.toString());
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('确定要删除这个产品吗？')) {
+  const handleDelete = async (id: number | undefined) => {
+    if (!id) return;
+    if (window.confirm('确定要删除这个商品吗？')) {
       await deleteProductMutation.mutateAsync(id);
     }
   };
@@ -191,7 +176,7 @@ export default function ProductManagement() {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">产品名称</label>
+              <label className="block text-sm font-medium text-gray-700">产名称</label>
               <input
                 type="text"
                 value={name}

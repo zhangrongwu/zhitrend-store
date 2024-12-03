@@ -55,7 +55,7 @@ export default function RatingList({ productId }: RatingListProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['ratings', productId]);
+      queryClient.invalidateQueries({ queryKey: ['ratings', productId] });
     },
   });
 
@@ -73,7 +73,7 @@ export default function RatingList({ productId }: RatingListProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['ratings', productId]);
+      queryClient.invalidateQueries({ queryKey: ['ratings', productId] });
       setReplyContent('');
       setReplyingTo(null);
     },

@@ -1,47 +1,35 @@
-import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
+import { motion, useInView, useAnimation } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: ReactNode;
-  direction?: 'up' | 'down' | 'left' | 'right';
-  delay?: number;
-  duration?: number;
-  threshold?: number;
+  width?: "fit-content" | "100%";
 }
 
-export default function ScrollReveal({
-  children,
-  direction = 'up',
-  delay = 0,
-  duration = 0.5,
-  threshold = 0.1
-}: ScrollRevealProps) {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      x: direction === 'left' ? 50 : direction === 'right' ? -50 : 0,
-      y: direction === 'up' ? 50 : direction === 'down' ? -50 : 0,
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-    },
-  };
+export default function ScrollReveal({ children, width = "fit-content" }: ScrollRevealProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const mainControls = useAnimation();
+
+  useEffect(() => {
+    if (isInView) {
+      mainControls.start("visible");
+    }
+  }, [isInView, mainControls]);
 
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, threshold }}
-      variants={variants}
-      transition={{
-        duration,
-        delay,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-    >
-      {children}
-    </motion.div>
+    <div ref={ref} style={{ position: "relative", width }}>
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 75 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        animate={mainControls}
+        transition={{ duration: 0.5, delay: 0.25 }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 } 

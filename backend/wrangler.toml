@@ -6,7 +6,7 @@ node_compat = true
 [[d1_databases]]
 binding = "DB"
 database_name = "shop"
-database_id = "your-database-id"
+database_id = "2f334e93-d1ac-4f14-b0cb-68d45d48916f"
 
 [[r2_buckets]]
 binding = "R2"

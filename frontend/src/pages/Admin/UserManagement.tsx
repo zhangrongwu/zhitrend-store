@@ -41,7 +41,7 @@ export default function UserManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       setAlert({ type: 'success', message: '用户角色更新成功！' });
     },
     onError: () => {

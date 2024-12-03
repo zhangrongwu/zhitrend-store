@@ -1,51 +1,45 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface VirtualListProps<T> {
   items: T[];
   height: number;
   itemHeight: number;
   renderItem: (item: T, index: number) => React.ReactNode;
-  overscan?: number;
 }
 
-export default function VirtualList<T>({
-  items,
-  height,
-  itemHeight,
-  renderItem,
-  overscan = 3
-}: VirtualListProps<T>) {
-  const [scrollTop, setScrollTop] = useState(0);
+export default function VirtualList<T>({ items, height, itemHeight, renderItem }: VirtualListProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
 
   const totalHeight = items.length * itemHeight;
-  const visibleItems = Math.ceil(height / itemHeight);
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(items.length, startIndex + visibleItems + 2 * overscan);
+  const startIndex = Math.floor(scrollTop / itemHeight);
+  const visibleCount = Math.ceil(height / itemHeight) + 1;
+  const visibleItems = items.slice(startIndex, startIndex + visibleCount);
 
-  const visibleItemsData = items.slice(startIndex, endIndex);
-  const offsetY = startIndex * itemHeight;
-
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollTop(containerRef.current.scrollTop);
-    }
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setScrollTop(e.currentTarget.scrollTop);
   };
 
   return (
     <div
       ref={containerRef}
-      onScroll={handleScroll}
       style={{ height, overflow: 'auto' }}
+      onScroll={handleScroll}
     >
       <div style={{ height: totalHeight, position: 'relative' }}>
-        <div style={{ transform: `translateY(${offsetY}px)` }}>
-          {visibleItemsData.map((item, index) => (
-            <div key={startIndex + index} style={{ height: itemHeight }}>
-              {renderItem(item, startIndex + index)}
-            </div>
-          ))}
-        </div>
+        {visibleItems.map((item, index) => (
+          <div
+            key={startIndex + index}
+            style={{
+              position: 'absolute',
+              top: (startIndex + index) * itemHeight,
+              height: itemHeight,
+              width: '100%',
+            }}
+          >
+            {renderItem(item, startIndex + index)}
+          </div>
+        ))}
       </div>
     </div>
   );

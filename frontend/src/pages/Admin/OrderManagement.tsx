@@ -52,7 +52,9 @@ export default function OrderManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-orders']);
+      queryClient.invalidateQueries({ 
+        queryKey: ['admin-orders'] 
+      });
       setAlert({ type: 'success', message: '订单状态更新成功！' });
     },
     onError: () => {

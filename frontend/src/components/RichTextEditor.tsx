@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useCallback } from 'react';
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 interface RichTextEditorProps {
   value: string;
@@ -8,41 +9,26 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-const modules = {
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    [{ color: [] }, { background: [] }],
-    ['link', 'image'],
-    ['clean'],
-  ],
-};
-
-const formats = [
-  'header',
-  'bold', 'italic', 'underline', 'strike',
-  'list', 'bullet',
-  'color', 'background',
-  'link', 'image',
-];
-
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const handleChange = useCallback((content: string) => {
     onChange(content);
   }, [onChange]);
 
   return (
-    <div className="rich-text-editor">
-      <ReactQuill
-        theme="snow"
-        value={value}
-        onChange={handleChange}
-        modules={modules}
-        formats={formats}
-        placeholder={placeholder}
-        className="h-64"
-      />
-    </div>
+    <ReactQuill
+      theme="snow"
+      value={value}
+      onChange={handleChange}
+      placeholder={placeholder}
+      modules={{
+        toolbar: [
+          [{ header: [1, 2, false] }],
+          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link', 'image'],
+          ['clean'],
+        ],
+      }}
+    />
   );
 } 

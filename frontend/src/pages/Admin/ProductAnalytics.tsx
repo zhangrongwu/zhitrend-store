@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChartBarIcon, EyeIcon, ShoppingCartIcon, CurrencyYenIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface ProductAnalytics {
   productStats: {
